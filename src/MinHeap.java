@@ -98,16 +98,30 @@ public class MinHeap<T extends Comparable<T>> implements  MyMinHeap<T>{
         int rightChildIndex = rightChild(index);
 
         T parent = heap[index];
-        T smallestChild = null;
+        int smallestChildIndex = findMinChild(index);
+
+        if(smallestChildIndex == -1) return;
+
+        T smallestChild = heap[smallestChildIndex];
+
+        if(parent.compareTo(smallestChild) > 0){
+            swap(index, smallestChildIndex);
+            downHeap(smallestChildIndex);
+        }
+    }
+
+    private int findMinChild(int parentIndex){
+        int leftChildIndex = leftChild(parentIndex);
+        int rightChildIndex = rightChild(parentIndex);
+
         int smallestChildIndex = -1;
 
         if(leftChildIndex >= length){
             //No more children...
-            return;
+            return -1;
 
         } else if(rightChildIndex >= length){
             //only left child...
-            smallestChild = heap[leftChildIndex];
             smallestChildIndex = leftChildIndex;
 
         }else {
@@ -116,19 +130,14 @@ public class MinHeap<T extends Comparable<T>> implements  MyMinHeap<T>{
             T rightChild = heap[rightChildIndex];
 
             if(leftChild.compareTo(rightChild) < 0){
-                smallestChild = leftChild;
                 smallestChildIndex = leftChildIndex;
             }else {
-                smallestChild = rightChild;
                 smallestChildIndex = rightChildIndex;
             }
         }
-
-        if(parent.compareTo(smallestChild) > 0){
-            swap(index, smallestChildIndex);
-            downHeap(smallestChildIndex);
-        }
+        return smallestChildIndex;
     }
+
     private int parent(int index){
         return (index - 1) / 2;
     }
@@ -136,7 +145,7 @@ public class MinHeap<T extends Comparable<T>> implements  MyMinHeap<T>{
         return 2 * index + 1;
     }
     private int rightChild(int index){
-        return 2 * index + 1;
+        return 2 * index + 2;
     }
     private void swap(int index1, int index2){
         T element1 = heap[index1];
@@ -152,4 +161,51 @@ public class MinHeap<T extends Comparable<T>> implements  MyMinHeap<T>{
         }
         heap = newHeap;
     }
+
+    public MinHeap(T list[]) throws IllegalArgumentException {
+        if(list == null){
+            throw new IllegalArgumentException();
+        }
+        heap = list;
+        capacity = list.length;
+        length = list.length;
+
+        for (int i = length - 1; i >= 0; i--) {
+            downHeap(i);
+        }
+    }
+
+    public boolean contains(T val) throws IllegalArgumentException {
+        if(val == null){
+            throw new IllegalArgumentException();
+        }
+
+        return contains(val, 0);
+    }
+
+    private boolean contains(T val, int startIndex){
+        if (startIndex >= length){
+            return false;
+        }
+        if(heap[startIndex].compareTo(val) == 0) {
+            return true;
+        }
+        if(heap[startIndex].compareTo(val) > 0) {
+            return false;
+        }
+
+        if (contains(val, leftChild(startIndex)) || contains(val, rightChild(startIndex))){
+            return true;
+        }
+
+        return false;
+    }
+    public static<T extends Comparable<T>> void sort(T list[]) throws IllegalArgumentException {
+        MinHeap minHeap = new MinHeap<T>(list);
+
+        for (int i = list.length - 1; i >= 0; i--) {
+            list[i] = (T) minHeap.removeMin();
+        }
+    }
+
 }
